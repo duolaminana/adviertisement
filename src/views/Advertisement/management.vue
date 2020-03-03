@@ -29,13 +29,13 @@
       style="width: 100%;"
     >
       <el-table-column align="center" type="selection" width="55"></el-table-column>
-      <el-table-column align="center" prop="machineCode" label="广告名称" width="120"></el-table-column>
-      <el-table-column align="center" prop="area" label="发布人" width="120"></el-table-column>
-      <el-table-column align="center" prop="point" label="广告类型" width="120"></el-table-column>
-      <el-table-column align="center" prop="police" label="播放时长/大小" min-width="50"></el-table-column>
-      <el-table-column align="center" prop="policePlace" label="发布时间" min-width="50"></el-table-column>
+      <el-table-column align="center" prop="machineCode" label="广告名称" min-width="120"></el-table-column>
+      <el-table-column align="center" prop="area" label="发布人" width="100"></el-table-column>
+      <el-table-column align="center" prop="point" label="广告类型" width="80"></el-table-column>
+      <el-table-column align="center" prop="police" label="播放时长/大小" min-width="120"></el-table-column>
+      <el-table-column align="center" prop="policePlace" label="发布时间" min-width="120"></el-table-column>
       <el-table-column align="center" prop="poi" label="广告描述" min-width="120"></el-table-column>
-      <el-table-column label="操作" align="center" min-width="300">
+      <el-table-column label="操作" align="center" min-width="360">
         <template slot-scope="scope">
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button>
@@ -60,7 +60,7 @@
       width="600px"
       @click="closeDialog('edit')"
     >
-      <el-form label-width="120px" ref="editForm" :model="editForm">
+      <el-form class="dialogForm" label-width="120px" ref="editForm" :model="editForm">
         <el-form-item label="广告名称">
           <el-input
             size="small"
@@ -507,7 +507,7 @@ export default {
 .userRole {
   width: 100%;
 }
-.el-form-item {
+.dialogForm {
   /deep/ .el-input--small {
     width: 390px;
   }

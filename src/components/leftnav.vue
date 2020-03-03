@@ -29,14 +29,14 @@ export default {
       collapsed: false,
       allmenu: [
         {
-          menuid: 71,
+          menuid: 1,
           icon: 'li-icon-xitongguanli',
           menuname: '酒店管理',
           hasThird: null,
           url: null,
           menus: [
             {
-              menuid: 72,
+              menuid: 2,
               icon: 'icon-cus-manage',
               menuname: '酒店管理',
               hasThird: 'N',
@@ -46,14 +46,14 @@ export default {
           ]
         },
         {
-          menuid: 73,
+          menuid: 3,
           icon: 'li-icon-xiangmuguanli',
           menuname: '广告管理',
           hasThird: null,
           url: null,
           menus: [
             {
-              menuid: 74,
+              menuid: 4,
               icon: 'icon-cat-skuQuery',
               menuname: '广告管理',
               hasThird: 'N',
@@ -61,7 +61,7 @@ export default {
               menus: null
             },
             {
-              menuid: 75,
+              menuid: 5,
               icon: 'icon-cs-manage',
               menuname: '广告分组',
               hasThird: 'N',
@@ -71,14 +71,14 @@ export default {
           ]
         },
         {
-          menuid: 76,
+          menuid: 6,
           icon: 'li-icon-dingdanguanli',
           menuname: '广告计划',
           hasThird: null,
           url: null,
           menus: [
             {
-              menuid: 77,
+              menuid: 7,
               icon: 'icon-order-manage',
               menuname: '播放计划',
               hasThird: 'N',

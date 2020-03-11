@@ -11,6 +11,8 @@ import user from '@/views/system/user';
 import management from "@/views/Advertisement/management";
 // 广告分组
 import group from "@/views/Advertisement/group";
+// 设备分组
+import equGroup from "@/views/equipment/equGroup";
 // 播放计划
 import play from "@/views/plan/play";
 // 启用路由
@@ -64,6 +66,14 @@ export default new Router({
           path: "/Advertisement/group",
           name: "广告分组",
           component: group,
+          meta: {
+            requireAuth: true
+          }
+        },
+        {
+          path: "/equipment/equGroup",
+          name: "设备分组",
+          component: equGroup,
           meta: {
             requireAuth: true
           }

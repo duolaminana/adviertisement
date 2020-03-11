@@ -2,7 +2,7 @@
  * 系统管理 用户管理
  */
 <template>
-  <div>
+  <div class="user">
     <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/index' }">首页</el-breadcrumb-item>
@@ -16,7 +16,7 @@
       <el-form-item label>
         <el-input size="small" v-model="formInline.point" placeholder="输入酒店名称"></el-input>
       </el-form-item>
-      <el-form-item label="是否营业：">
+      <el-form-item label="是否营业">
         <el-select size="small" clearable v-model="formInline.isBusiness" placeholder="请选择">
           <el-option label="歇业" value="0"></el-option>
           <el-option label="正常" value="1"></el-option>
@@ -25,7 +25,7 @@
       <el-form-item label>
         <el-input size="small" v-model="formInline.area" placeholder="请输入所在区域"></el-input>
       </el-form-item>
-      <el-form-item label="是否在线：">
+      <el-form-item label="是否在线">
         <el-select size="small" clearable v-model="formInline.machineState" placeholder="请选择">
           <el-option label="正常" value="0"></el-option>
           <el-option label="异常" value="1"></el-option>
@@ -465,15 +465,23 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.user-search {
-  margin-top: 20px;
-}
-.userRole {
-  width: 100%;
-}
-.dialogForm {
-  /deep/ .el-input--small {
-    width: 390px;
+.user {
+  .el-select {
+    width: 100px;
+  }
+  .el-input{
+    width: 160px;
+  }
+  .user-search {
+    margin-top: 20px;
+  }
+  .userRole {
+    width: 100%;
+  }
+  .dialogForm {
+    /deep/ .el-input--small {
+      width: 390px;
+    }
   }
 }
 </style>

@@ -73,12 +73,29 @@ export default {
         {
           menuid: 6,
           icon: 'li-icon-dingdanguanli',
-          menuname: '广告计划',
+          menuname: '设备管理',
           hasThird: null,
           url: null,
           menus: [
             {
               menuid: 7,
+              icon: 'icon-order-manage',
+              menuname: '设备分组',
+              hasThird: 'N',
+              url: 'equipment/equGroup',
+              menus: null
+            },
+          ]
+        },
+        {
+          menuid: 8,
+          icon: 'li-icon-dingdanguanli',
+          menuname: '广告计划',
+          hasThird: null,
+          url: null,
+          menus: [
+            {
+              menuid: 9,
               icon: 'icon-order-manage',
               menuname: '播放计划',
               hasThird: 'N',

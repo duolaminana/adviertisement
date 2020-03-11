@@ -1,5 +1,5 @@
 import axios from 'axios';
-const base = 'http://120.78.206.233:8081';
+const base = 'http://192.168.10.104:8034';
 export const netWorkHttp = (URL, info, method = 'post') => {
   return new Promise((resolve, reject) => {
     axios.request({

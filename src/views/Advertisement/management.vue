@@ -11,7 +11,7 @@
     <!-- 搜索筛选 -->
     <el-form :inline="true" :model="formInline" class="user-search">
       <el-form-item label>
-        <el-input size="small" v-model="formInline.machineCode" placeholder="输入广告关键字"></el-input>
+        <el-input size="small" v-model="formInline.machineCode" placeholder="请输入广告名"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button size="small" type="primary" icon="el-icon-search" @click="search">搜索</el-button>

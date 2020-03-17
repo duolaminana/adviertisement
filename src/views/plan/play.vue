@@ -31,26 +31,29 @@
       <el-table-column align="center" type="selection" width="55"></el-table-column>
       <el-table-column align="center" prop="planName" label="计划名称" min-width="120"></el-table-column>
       <el-table-column align="center" prop="advGroup" label="广告分组" width="120">
-        <template slot-scope="props">
-          <a href="javascript:void(0)">{{props.row.advGroup}}</a>
+        <template slot-scope="scope">
+          <span class="lookDetails" @click="machineChange(scope.row)">{{scope.row.advGroup}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" prop="equGroup" label="设备分组" width="120">
-        <template slot-scope="props">
-          <a href="javascript:void(0)">{{props.row.equGroup}}</a>
+        <template slot-scope="scope">
+          <span class="lookDetails" @click="machineChange(scope.row)">{{scope.row.equGroup}}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" prop="playTime" label="播放时长/大小" min-width="120"></el-table-column>
       <el-table-column align="center" prop="starTime" label="计划播放时间" min-width="120"></el-table-column>
       <el-table-column align="center" prop="enable" label="是否启用" width="80">
-        <template slot-scope="props">
-          <span v-if="props.row.enable==1" style="color:red">是</span>
+        <template slot-scope="scope">
+          <span v-if="scope.row.enable==1" class="green">已启用</span>
+          <span v-if="scope.row.enable==2" class="red">已禁用</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="150">
+      <el-table-column label="操作" align="center" width="240">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button>
+          <el-button v-if="scope.row.enable==2" size="mini" type="success">启用</el-button>
+          <el-button v-if="scope.row.enable==1" size="mini" type="warning">禁用</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -64,11 +67,11 @@
       @click="closeDialog('edit')"
     >
       <el-form class="dialogForm" label-width="120px" ref="editForm" :model="editForm">
-        <el-form-item label="广告名称">
-          <el-input size="small" v-model="editForm.area" auto-complete="off" placeholder="请输入广告名称"></el-input>
+        <el-form-item label="计划名称">
+          <el-input size="small" v-model="editForm.area" auto-complete="off" placeholder="请输入计划名称"></el-input>
         </el-form-item>
-        <el-form-item label="广告类型">
-          <el-select size="small" v-model="editForm.advertisingType" clearable placeholder="请选择">
+        <el-form-item label="广告组">
+          <el-select size="small" v-model="editForm.advertisingType" clearable placeholder="请选择广告组">
             <el-option
               v-for="item in advertisingType"
               :key="item.value"
@@ -77,8 +80,8 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="内容类别">
-          <el-select size="small" v-model="editForm.textType" clearable placeholder="请选择">
+        <el-form-item label="设备组">
+          <el-select size="small" v-model="editForm.textType" clearable placeholder="请选择设备组">
             <el-option
               v-for="item in textType"
               :key="item.value"
@@ -90,27 +93,7 @@
         <el-form-item label="发布人账号">
           <el-input size="small" v-model="editForm.address" placeholder="请输入发布人账号"></el-input>
         </el-form-item>
-        <el-form-item label="请选择广告">
-          <div>
-            <el-upload
-              class="upload-demo"
-              action="https://jsonplaceholder.typicode.com/posts/"
-              :on-preview="handlePreview"
-              :on-remove="handleRemove"
-              :before-remove="beforeRemove"
-              multiple
-              :limit="3"
-              :on-exceed="handleExceed"
-              :file-list="fileList"
-            >
-              <el-button size="small" type="primary">点击上传</el-button>
-            </el-upload>
-          </div>
-        </el-form-item>
-        <el-form-item label="文字广告">
-          <el-input size="small" v-model="editForm.police" placeholder="请输入广告描述"></el-input>
-        </el-form-item>
-        <el-form-item label="广告信息备注">
+        <el-form-item label="播放计划备注">
           <el-input
             size="small"
             v-model="editForm.policePlace"
@@ -132,7 +115,7 @@
     </el-dialog>
     <!-- 更换设备界面 -->
     <el-dialog
-      title="更换设备"
+      title="广告组详情"
       :visible.sync="machineChangeVisible"
       width="600px"
       @click="machineChangeVisible=false"
@@ -163,19 +146,6 @@
 
 <script>
 // 导入请求方法
-import {
-  userList,
-  userSave,
-  userDelete,
-  userPwd,
-  userExpireToken,
-  userFlashCache,
-  userLock,
-  UserDeptTree,
-  UserDeptSave,
-  UserDeptdeptTree,
-  UserChangeDept
-} from "../../api/userMG";
 import Pagination from "../../components/Pagination";
 import { netWorkHttp } from "../../api/http.js";
 export default {
@@ -272,37 +242,6 @@ export default {
     this.getData();
   },
   methods: {
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
-    },
-    handlePreview(file) {
-      console.log(file);
-    },
-    handleExceed(files, fileList) {
-      this.$message.warning(
-        `当前限制选择 3 个文件，本次选择了 ${
-          files.length
-        } 个文件，共选择了 ${files.length + fileList.length} 个文件`
-      );
-    },
-    beforeRemove(file, fileList) {
-      return this.$confirm(`确定移除 ${file.name}？`);
-    },
-
-    untying(row) {
-      const url = `/unbundlingMachine?&&id=${row.id}`;
-      netWorkHttp(url, null, "get")
-        .then(res => {
-          this.$message({
-            message: "操作成功",
-            type: "success"
-          });
-          this.getData();
-        })
-        .catch(err => {
-          this.$message.error("err");
-        });
-    },
     machineChangeKeep() {
       if (this.machineChangeValue.machineCode) {
         const url = `/replaceMachine?machineCode=${this.machineChangeValue.machineCode}
@@ -323,45 +262,31 @@ export default {
         this.$message.error("错了哦，信息填写不完整");
       }
     },
-    work(index, row, isWorking) {
-      const url = `/isBusiness?isBusiness=${isWorking}&&id=${row.id}`;
-      netWorkHttp(url, null, "get")
-        .then(res => {
-          this.$message({
-            message: "操作成功",
-            type: "success"
-          });
-          this.getData();
-        })
-        .catch(err => {
-          this.$message.error("err");
-        });
-    },
     machineChange(row) {
       this.machineChangeVisible = true;
       this.rowData = row;
     },
     // 获取数据方法
-    getData() {
-      const loading = this.$loading({
-        lock: true,
-        text: "Loading",
-        spinner: "el-icon-loading",
-        background: "rgba(0, 0, 0, 0.7)"
-      });
-      netWorkHttp("/list", this.formInline)
-        .then(res => {
-          this.pageparm.currentPage = res.body.pageIndex;
-          this.pageparm.pageSize = res.body.pageSize;
-          this.pageparm.total = res.body.totalNum;
-          this.playData = res.body.List;
-          loading.close();
-        })
-        .catch(err => {
-          this.$message.error("err");
-          loading.close();
-        });
-    },
+    // getData() {
+    //   const loading = this.$loading({
+    //     lock: true,
+    //     text: "Loading",
+    //     spinner: "el-icon-loading",
+    //     background: "rgba(0, 0, 0, 0.7)"
+    //   });
+    //   netWorkHttp("/list", this.formInline)
+    //     .then(res => {
+    //       this.pageparm.currentPage = res.body.pageIndex;
+    //       this.pageparm.pageSize = res.body.pageSize;
+    //       this.pageparm.total = res.body.totalNum;
+    //       this.playData = res.body.List;
+    //       loading.close();
+    //     })
+    //     .catch(err => {
+    //       this.$message.error("err");
+    //       loading.close();
+    //     });
+    // },
     // 分页插件事件
     callFather(parm) {
       this.formInline.pageIndex = parm.currentPage;
@@ -377,12 +302,12 @@ export default {
       this.editFormVisible = true;
       if (row) {
         this.showNewlyType = "bj";
-        this.title = "编辑广告";
+        this.title = "编辑播放计划";
         this.editForm = JSON.parse(JSON.stringify(row));
         this.editForm.isBusiness = this.editForm.isBusiness + "";
         this.editForm.isPoi = this.editForm.isPoi + "";
       } else {
-        this.title = "新增广告";
+        this.title = "新增播放计划";
         this.showNewlyType = "xz";
         this.editForm = {
           machineCode: null,

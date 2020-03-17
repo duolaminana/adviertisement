@@ -125,19 +125,6 @@
 
 <script>
 // 导入请求方法
-import {
-  userList,
-  userSave,
-  userDelete,
-  userPwd,
-  userExpireToken,
-  userFlashCache,
-  userLock,
-  UserDeptTree,
-  UserDeptSave,
-  UserDeptdeptTree,
-  UserChangeDept
-} from "../../api/userMG";
 import Pagination from "../../components/Pagination";
 import { netWorkHttp } from "../../api/http.js";
 export default {
@@ -152,7 +139,6 @@ export default {
         ],
         email: ""
       },
-      fileList: [],
       advertisingType: [
         {
           value: "选项1",
@@ -242,51 +228,6 @@ export default {
         value: "",
         key: Date.now()
       });
-    },
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
-    },
-    handlePreview(file) {
-      console.log(file);
-    },
-    handleExceed(files, fileList) {
-      this.$message.warning(
-        `当前限制选择 3 个文件，本次选择了 ${
-          files.length
-        } 个文件，共选择了 ${files.length + fileList.length} 个文件`
-      );
-    },
-    beforeRemove(file, fileList) {
-      return this.$confirm(`确定移除 ${file.name}？`);
-    },
-
-    untying(row) {
-      const url = `/unbundlingMachine?&&id=${row.id}`;
-      netWorkHttp(url, null, "get")
-        .then(res => {
-          this.$message({
-            message: "操作成功",
-            type: "success"
-          });
-          this.getData();
-        })
-        .catch(err => {
-          this.$message.error("err");
-        });
-    },
-    work(index, row, isWorking) {
-      const url = `/isBusiness?isBusiness=${isWorking}&&id=${row.id}`;
-      netWorkHttp(url, null, "get")
-        .then(res => {
-          this.$message({
-            message: "操作成功",
-            type: "success"
-          });
-          this.getData();
-        })
-        .catch(err => {
-          this.$message.error("err");
-        });
     },
     // 获取数据方法
     getData() {

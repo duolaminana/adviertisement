@@ -11,11 +11,12 @@
     <!-- 搜索筛选 -->
     <el-form :inline="true" :model="formInline" class="user-search">
       <el-form-item label>
-        <el-input size="small" v-model="formInline.machineCode" placeholder="请输入广告名"></el-input>
+        <el-input size="small" v-model="formInline.advName" placeholder="请输入广告名"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button size="small" type="primary" icon="el-icon-search" @click="search">搜索</el-button>
-        <el-button size="small" type="primary" icon="el-icon-plus" @click="handleEdit()">添加</el-button>
+        <el-button size="small" type="primary" icon="el-icon-plus" @click="handleEdit">添加</el-button>
+        <el-button size="small" type="primary" icon="el-icon-refresh" @click="reset">重置</el-button>
       </el-form-item>
     </el-form>
     <!--列表-->
@@ -29,25 +30,25 @@
       style="width: 100%;"
     >
       <el-table-column align="center" type="selection" width="55"></el-table-column>
-      <el-table-column align="center" prop="machineCode" label="广告名称" min-width="120"></el-table-column>
-      <el-table-column align="center" prop="area" label="发布人" width="100"></el-table-column>
-      <el-table-column align="center" prop="point" label="广告类型" width="80"></el-table-column>
-      <el-table-column align="center" prop="police" label="播放时长/大小" min-width="120"></el-table-column>
-      <el-table-column align="center" prop="policePlace" label="发布时间" min-width="120"></el-table-column>
-      <el-table-column align="center" prop="poi" label="广告描述" min-width="120"></el-table-column>
-      <el-table-column label="操作" align="center" min-width="360">
+      <el-table-column align="center" prop="advName" label="广告名称" min-width="120"></el-table-column>
+      <el-table-column align="center" prop="advUser" label="发布人" width="100"></el-table-column>
+      <el-table-column align="center" prop="advCategory" label="广告类型" width="120">
+        <template slot-scope="scope">{{scope.row.advCategory|advCategory}}</template>
+      </el-table-column>
+      <el-table-column align="center" prop="onceShowTime" label="播放时长/大小" min-width="120"></el-table-column>
+      <el-table-column align="center" prop="policePlace" label="发布时间" min-width="120">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <img :src="scope.row.advUrl" class="imgstyle" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" prop="advType" label="内容类别" width="120">
+        <template slot-scope="scope">{{scope.row.advType|advType}}</template>
+      </el-table-column>
+      <el-table-column label="操作" align="center" min-width="240">
+        <template slot-scope="scope">
+          <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row,'bj')">编辑</el-button>
+          <el-button size="mini" type="warning" @click="handleEdit(scope.$index, scope.row,'sh')">审核</el-button>
           <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button>
-          <el-button size="mini" type="success" @click="untying(scope.row)">解绑</el-button>
-          <el-button size="mini" type="warning" @click="machineChange(scope.row)">更换</el-button>
-          <el-button
-            v-if="!scope.row.isBusiness"
-            size="mini"
-            type="success"
-            @click="work(scope.$index, scope.row,1)"
-          >营业</el-button>
-          <el-button v-else size="mini" type="danger" @click="work(scope.$index, scope.row,0)">歇业</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -58,19 +59,21 @@
       :title="title"
       :visible.sync="editFormVisible"
       width="600px"
-      @click="closeDialog('edit')"
+      @close="closeDialog('editForm')"
     >
-      <el-form class="dialogForm" label-width="120px" ref="editForm" :model="editForm">
-        <el-form-item label="广告名称">
-          <el-input
-            size="small"
-            v-model="editForm.area"
-            auto-complete="off"
-            placeholder="请输入广告名称"
-          ></el-input>
+      <el-form
+        class="dialogForm"
+        label-width="120px"
+        ref="editForm"
+        :rules="rules"
+        :model="editForm"
+        :disabled="isCheck"
+      >
+        <el-form-item label="广告名称" prop="advName">
+          <el-input size="small" v-model="editForm.advName" placeholder="请输入广告名称" ></el-input>
         </el-form-item>
-        <el-form-item label="广告类型">
-          <el-select size="small" v-model="editForm.advertisingType" clearable placeholder="请选择">
+        <el-form-item label="广告类型" prop="advCategory">
+          <el-select size="small" v-model="editForm.advCategory" clearable placeholder="请选择">
             <el-option
               v-for="item in advertisingType"
               :key="item.value"
@@ -79,8 +82,8 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="内容类别">
-          <el-select size="small" v-model="editForm.textType" clearable placeholder="请选择">
+        <el-form-item label="内容类别" prop="advType">
+          <el-select size="small" v-model="editForm.advType" clearable placeholder="请选择">
             <el-option
               v-for="item in textType"
               :key="item.value"
@@ -89,75 +92,79 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="发布人账号">
-          <el-input size="small" v-model="editForm.address" placeholder="请输入发布人账号"></el-input>
+        <!-- <el-form-item label="广告时间">
+          <el-col :span="10">
+            <el-form-item prop="startPlayTime">
+              <el-date-picker
+                v-model="editForm.startPlayTime"
+                size="small"
+                type="datetime"
+                placeholder="选择开始时间"
+                style="width:185px;"
+                :picker-options="pickerOptionsStart"
+              ></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col class="line" :span="1">---</el-col>
+          <el-col :span="10">
+            <el-form-item prop="stopPlayTime">
+              <el-date-picker
+                v-model="editForm.stopPlayTime"
+                size="small"
+                type="datetime"
+                placeholder="选择结束时间"
+                style="width: 185px;"
+                :picker-options="pickerOptionsEnd"
+              ></el-date-picker>
+            </el-form-item>
+          </el-col>
+        </el-form-item>-->
+        <el-form-item label="单次播放时间" prop="onceShowTime">
+          <el-input size="small" v-model="editForm.onceShowTime" placeholder="请输入单次播放时间"></el-input>
         </el-form-item>
-        <el-form-item label="请选择广告">
-          <div>
-            <el-upload
-              class="upload-demo"
-              action="https://jsonplaceholder.typicode.com/posts/"
-              :on-preview="handlePreview"
-              :on-remove="handleRemove"
-              :before-remove="beforeRemove"
-              multiple
-              :limit="3"
-              :on-exceed="handleExceed"
-              :file-list="fileList"
-            >
-              <el-button size="small" type="primary">点击上传</el-button>
-            </el-upload>
-          </div>
+        <el-form-item label="播放序号" prop="orderNumber">
+          <el-input size="small" v-model="editForm.orderNumber" placeholder="请输入播放序号"></el-input>
         </el-form-item>
-        <el-form-item label="文字广告">
-          <el-input size="small" v-model="editForm.police" placeholder="请输入广告描述"></el-input>
-        </el-form-item>
-        <el-form-item label="广告信息备注">
-          <el-input
-            size="small"
-            v-model="editForm.policePlace"
-            type="textarea"
-            placeholder="请输入备注内容"
-          ></el-input>
+        <el-form-item label="请选择广告" prop="advText">
+          <el-upload
+            ref="myUpload"
+            class="avatar-uploader"
+            action
+            :show-file-list="imageUrl?true:false"
+            :auto-upload="false"
+            :on-change="changeUpload"
+          >
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="closeDialog('edit')">取消</el-button>
+        <el-button size="small" @click="closeDialog('editForm')">取消</el-button>
         <el-button
+          v-if="this.showNewlyType=='xz'||this.showNewlyType=='bj'"
           size="small"
           type="primary"
           :loading="loading"
           class="title"
-          @click="submitForm"
+          @click="submitForm('editForm')"
         >保存</el-button>
-      </div>
-    </el-dialog>
-    <!-- 更换设备界面 -->
-    <el-dialog
-      title="更换设备"
-      :visible.sync="machineChangeVisible"
-      width="600px"
-      @click="machineChangeVisible=false"
-    >
-      <el-form label-width="100px" :model="machineChangeValue">
-        <el-form-item label="设备号">
-          <el-input
-            size="small"
-            v-model="machineChangeValue.machineCode"
-            auto-complete="off"
-            placeholder="请输入设备号"
-          ></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="machineChangeVisible=false">取消</el-button>
         <el-button
+          v-if="this.showNewlyType=='sh'"
           size="small"
           type="primary"
           :loading="loading"
           class="title"
-          @click="machineChangeKeep"
-        >保存</el-button>
+          @click="submitForm('editForm',true)"
+        >审核通过</el-button>
+        <el-button
+          v-if="this.showNewlyType=='sh'"
+          size="small"
+          type="danger"
+          :loading="loading"
+          class="title"
+          @click="submitForm('editForm',false)"
+        >审核不通过</el-button>
       </div>
     </el-dialog>
   </div>
@@ -165,87 +172,126 @@
 
 <script>
 // 导入请求方法
-import {
-  userList,
-  userSave,
-  userDelete,
-  userPwd,
-  userExpireToken,
-  userFlashCache,
-  userLock,
-  UserDeptTree,
-  UserDeptSave,
-  UserDeptdeptTree,
-  UserChangeDept
-} from "../../api/userMG";
 import Pagination from "../../components/Pagination";
-import { netWorkHttp } from "../../api/http.js";
+import { netWorkAdv } from "../../api/http.js";
 export default {
   name: "adviertisementManagement",
   data() {
     return {
-      fileList: [],
+      // pickerOptionsStart: {
+      //   disabledDate: time => {
+      //     if (this.editForm.stopPlayTime) {
+      //       return (
+      //         time.getTime() < Date.now() - 8.64e7 ||
+      //         time.getTime() > this.editForm.stopPlayTime
+      //       );
+      //     }
+      //     return time.getTime() < Date.now() - 8.64e7;
+      //   }
+      // },
+      // pickerOptionsEnd: {
+      //   disabledDate: time => {
+      //     return (
+      //       time.getTime() < Date.now() - 8.64e7 ||
+      //       time.getTime() < this.editForm.startPlayTime
+      //     );
+      //   }
+      // },
+      file: null,
+      imageUrl: null,
       advertisingType: [
         {
-          value: "选项1",
+          value: "1",
           label: "公益广告"
         },
         {
-          value: "选项2",
+          value: "2",
+          label: "宣传广告"
+        },
+        {
+          value: "3",
           label: "效益广告"
         },
         {
-          value: "选项3",
+          value: "4",
           label: "招商广告"
         }
       ],
       textType: [
         {
-          value: "选项1",
+          value: "1",
           label: "文字广告"
         },
         {
-          value: "选项2",
+          value: "2",
           label: "视频广告"
         },
         {
-          value: "选项3",
+          value: "3",
           label: "图片广告"
         }
       ],
       machineChangeValue: {},
       machineChangeVisible: false,
-      nshow: true, //switch开启
-      fshow: false, //switch关闭
       loading: false, //是显示加载
       title: "",
       editFormVisible: false, //控制编辑页面显示与隐藏
       unitAccessshow: false, //控制所属单位隐藏与显示
-      // 编辑与添加
+      // 编辑与添加数据
       editForm: {
-        machineCode: null,
-        area: null,
-        point: null,
-        address: null,
-        roomNum: null,
-        type: null,
-        police: null,
-        policePlace: null,
-        isBusiness: "1",
-        isPoi: "1",
-        poi: null
+        advName: null,
+        advCategory: null,
+        advType: null,
+        // startPlayTime: null,
+        // stopPlayTime: null,
+        onceShowTime: null,
+        orderNumber: null,
+        advAudit: 0
+      },
+      rules: {
+        advName: [
+          { required: true, message: "请输入活动名称", trigger: "blur" },
+          { min: 3, max: 20, message: "长度在 3 到 20 个字符", trigger: "blur" }
+        ],
+        advCategory: [
+          { required: true, message: "请选择广告类型", trigger: "change" }
+        ],
+        advType: [
+          { required: true, message: "请选择内容类别", trigger: "change" }
+        ],
+        // startPlayTime: [
+        //   {
+        //     required: true,
+        //     message: "请选择开始时间",
+        //     trigger: "change"
+        //   }
+        // ],
+        // stopPlayTime: [
+        //   {
+        //     required: true,
+        //     message: "请选择结束时间",
+        //     trigger: "change"
+        //   }
+        // ],
+        onceShowTime: [
+          { required: true, message: "请填写播放时间", trigger: "blur" }
+        ],
+        orderNumber: [
+          { required: true, message: "请填写播放序号", trigger: "blur" }
+        ]
       },
       // 请求数据参数
       formInline: {
         pageIndex: 1,
         pageSize: 10,
-        machineCode: null,
-        point: null,
-        isBusiness: null,
-        area: null,
-        machineState: null
+        advId: null,
+        advName: null,
+        advCategory: null,
+        advType: null,
+        advUser: null,
+        advAudit: null
       },
-      //用户数据
+      //广告数据
       advertisingData: [{}],
       // 分页参数
       pageparm: {
@@ -254,7 +300,8 @@ export default {
         total: 10
       },
       rowData: null,
-      showNewlyType: "xz"
+      showNewlyType: "xz",
+      isCheck: true
     };
   },
   // 注册组件
@@ -264,75 +311,48 @@ export default {
   created() {
     this.getData();
   },
-  methods: {
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
-    },
-    handlePreview(file) {
-      console.log(file);
-    },
-    handleExceed(files, fileList) {
-      this.$message.warning(
-        `当前限制选择 3 个文件，本次选择了 ${
-          files.length
-        } 个文件，共选择了 ${files.length + fileList.length} 个文件`
-      );
-    },
-    beforeRemove(file, fileList) {
-      return this.$confirm(`确定移除 ${file.name}？`);
-    },
-
-    untying(row) {
-      const url = `/unbundlingMachine?&&id=${row.id}`;
-      netWorkHttp(url, null, "get")
-        .then(res => {
-          this.$message({
-            message: "操作成功",
-            type: "success"
-          });
-          this.getData();
-        })
-        .catch(err => {
-          this.$message.error("err");
-        });
-    },
-    machineChangeKeep() {
-      if (this.machineChangeValue.machineCode) {
-        const url = `/replaceMachine?machineCode=${this.machineChangeValue.machineCode}
-        &&id=${this.rowData.id}`;
-        netWorkHttp(url, null, "get")
-          .then(res => {
-            this.machineChangeVisible = false;
-            this.$message({
-              message: "操作成功",
-              type: "success"
-            });
-            this.getData();
-          })
-          .catch(err => {
-            this.$message.error("err");
-          });
-      } else {
-        this.$message.error("错了哦，信息填写不完整");
+  filters: {
+    advType(num) {
+      switch (num) {
+        case 1:
+          return "文本";
+          break;
+        case 2:
+          return "图片";
+          break;
+        case 3:
+          return "视频";
+          break;
       }
     },
-    work(index, row, isWorking) {
-      const url = `/isBusiness?isBusiness=${isWorking}&&id=${row.id}`;
-      netWorkHttp(url, null, "get")
-        .then(res => {
-          this.$message({
-            message: "操作成功",
-            type: "success"
-          });
-          this.getData();
-        })
-        .catch(err => {
-          this.$message.error("err");
-        });
+    advCategory(num) {
+      switch (num) {
+        case "1":
+          return "公益广告";
+          break;
+        case "2":
+          return "宣传广告";
+          break;
+        case "3":
+          return "效益广告";
+          break;
+        case "4":
+          return "招商广告";
+          break;
+      }
+    }
+  },
+  methods: {
+    reset() {
+      this.formInline.advName = null;
+      this.formInline.pageIndex = 1;
+      this.formInline.pageSize = 10;
+      this.getData();
     },
-    machineChange(row) {
-      this.machineChangeVisible = true;
-      this.rowData = row;
+    changeUpload(file) {
+      console.log(file);
+      this.file = file.raw;
+      this.imageUrl = URL.createObjectURL(file.raw);
     },
     // 获取数据方法
     getData() {
@@ -342,7 +362,7 @@ export default {
         spinner: "el-icon-loading",
         background: "rgba(0, 0, 0, 0.7)"
       });
-      netWorkHttp("/list", this.formInline)
+      netWorkAdv("/list", this.formInline)
         .then(res => {
           this.pageparm.currentPage = res.body.pageIndex;
           this.pageparm.pageSize = res.body.pageSize;
@@ -363,102 +383,92 @@ export default {
     },
     //搜索事件
     search() {
+      this.formInline.pageIndex = 1;
       this.getData();
     },
     //显示编辑界面
-    handleEdit: function(index, row) {
+    handleEdit(index, row, type) {
       this.editFormVisible = true;
-      if (row) {
+      if (type == "bj") {
+        this.isCheck = false;
         this.showNewlyType = "bj";
         this.title = "编辑广告";
         this.editForm = JSON.parse(JSON.stringify(row));
-        this.editForm.isBusiness = this.editForm.isBusiness + "";
-        this.editForm.isPoi = this.editForm.isPoi + "";
+        console.log(this.editForm);
+      } else if (type == "sh") {
+        this.isCheck = true;
+        this.showNewlyType = "sh";
+        this.title = "审核广告";
+        this.editForm = JSON.parse(JSON.stringify(row));
       } else {
+        this.isCheck = false;
         this.title = "新增广告";
         this.showNewlyType = "xz";
         this.editForm = {
-          machineCode: null,
-          area: null,
-          point: null,
-          police: null,
-          policePlace: null,
-          isBusiness: "1",
-          isPoi: "1",
-
-          poi: null
+          advName: null,
+          advCategory: null,
+          advType: null,
+          // startPlayTime: null,
+          // stopPlayTime: null,
+          onceShowTime: null,
+          orderNumber: null,
+          advAudit: 0
         };
+        this.file = null;
+        this.imageUrl = null;
+        setTimeout(() => {
+          this.$refs["myUpload"].clearFiles();
+        }, 2);
       }
     },
+
     // 编辑、添加提交方法
-    submitForm() {
-      let {
-        machineCode,
-        area,
-        point,
-        police,
-        policePlace,
-        isBusiness,
-        id,
-        isPoi,
-        poi,
-        type,
-        roomNum,
-        address
-      } = this.editForm;
-      if (
-        machineCode &&
-        area &&
-        point &&
-        police &&
-        policePlace &&
-        type &&
-        roomNum &&
-        address &&
-        (isPoi == 0 || poi)
-      ) {
-        let data = {
-          machineCode,
-          area,
-          point,
-          police,
-          policePlace,
-          isBusiness,
-          id,
-          isPoi,
-          type,
-          roomNum,
-          address,
-          poi
-        };
-        let url;
-        if (this.showNewlyType == "xz") {
-          url = "/add";
-        } else {
-          url = "/update";
-        }
-        netWorkHttp(url, data)
-          .then(res => {
-            this.editFormVisible = false;
-            this.loading = false;
-            this.$message({
-              message: "操作成功",
-              type: "success"
+    submitForm(formName, flag) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          this.loading = true;
+          let url;
+          if (this.showNewlyType == "xz") {
+            url = "/upload";
+          } else if (this.showNewlyType == "bj") {
+            url = "/update";
+          } else {
+            flag ? (this.editForm.advAudit = 1) : (this.editForm.advAudit = 2);
+            url = "/update";
+          }
+          // this.editForm.startPlayTime = new Date(
+          //   this.editForm.startPlayTime
+          // ).getTime();
+          // this.editForm.stopPlayTime = new Date(
+          //   this.editForm.stopPlayTime
+          // ).getTime();
+          let data = new FormData();
+          for (let key in this.editForm) {
+            data.append(key, this.editForm[key]);
+          }
+          data.append("file", this.file);
+          netWorkAdv(url, data)
+            .then(res => {
+              this.editFormVisible = false;
+              this.loading = false;
+              this.$message({
+                message: "操作成功",
+                type: "success"
+              });
+              this.getData();
+            })
+            .catch(err => {
+              this.editFormVisible = false;
+              this.loading = false;
+              this.$message.error("操作失败，请稍后再试！");
             });
-            this.getData();
-          })
-          .catch(err => {
-            this.editFormVisible = false;
-            this.loading = false;
-            this.$message.error("操作失败，请稍后再试！");
-          });
-      } else {
-        this.$message.error("信息填写不完整！");
-      }
+        }
+      });
     },
     // 关闭编辑、增加弹出框
-    closeDialog(dialog) {
+    closeDialog(name) {
       this.editFormVisible = false;
+      this.$refs[name].resetFields();
     },
     // 删除用户
     deleteUser(index, row) {
@@ -501,18 +511,52 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.user-search {
-  margin-top: 20px;
-}
-.userRole {
-  width: 100%;
-}
-.dialogForm {
-  /deep/ .el-input--small {
-    width: 390px;
+.adviertisementManagement {
+  .user-search {
+    margin-top: 20px;
   }
-  /deep/ .upload-demo{
-    width: 390px;
+  .userRole {
+    width: 100%;
+  }
+  .imgstyle {
+    width: 50px;
+    height: 50px;
+    margin: 5px 5px 0px 5px;
+    box-sizing: border-box;
+  }
+  .dialogForm {
+    /deep/ .el-input--small {
+      width: 390px;
+    }
+    /deep/ .upload-demo {
+      width: 390px;
+    }
+    .line {
+      margin-left: 3px;
+    }
+    /deep/ .avatar-uploader .el-upload {
+      border: 1px dashed #d9d9d9;
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    /deep/ .avatar-uploader .el-upload:hover {
+      border-color: #409eff;
+    }
+    .avatar-uploader-icon {
+      font-size: 28px;
+      color: #8c939d;
+      width: 170px;
+      height: 170px;
+      line-height: 170px;
+      text-align: center;
+    }
+    .avatar {
+      width: 170px;
+      height: 170px;
+      display: block;
+    }
   }
 }
 </style>

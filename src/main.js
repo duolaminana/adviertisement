@@ -28,6 +28,9 @@ Vue.config.productionTip = false;
 Vue.use(ElementUI);
 // 过滤器
 import * as custom from './utils/util'
+Vue.filter("dateformat", (dataStr, pattern) => {
+  return moment(dataStr).format(pattern);
+});
 
 Object.keys(custom).forEach(key => {
     Vue.filter(key, custom[key])

@@ -44,3 +44,45 @@ export const netWorkAdv = (URL, info, method = "post") => {
       });
   });
 };
+// 广告分组管理
+export const netWorkAdvGroup = (URL, info, method = "post") => {
+  return new Promise((resolve, reject) => {
+    axios
+      .request({
+        url: base + "/advertGroup" + URL,
+        data: info,
+        method
+      })
+      .then(res => {
+        if (res.data.status == 200) {
+          resolve(res.data);
+        } else {
+          reject(res.data.body);
+        }
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+};
+// 广告分组管理
+export const netWorkAdvGroupDet = (URL, info, method = "post") => {
+  return new Promise((resolve, reject) => {
+    axios
+      .request({
+        url: base + "/advGroupDetails" + URL,
+        data: info,
+        method
+      })
+      .then(res => {
+        if (res.data.status == 200) {
+          resolve(res.data);
+        } else {
+          reject(res.data.body);
+        }
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+};

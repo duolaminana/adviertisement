@@ -242,9 +242,9 @@ export default {
   components: {
     Pagination
   },
-  created() {
-    this.getData();
-  },
+  // created() {
+  //   this.getData();
+  // },
   methods: {
     untying(row) {
       const url = `/unbundlingMachine?&&id=${row.id}`;

@@ -9,7 +9,7 @@
       <el-breadcrumb-item>广告管理</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 搜索筛选 -->
-    <el-form :inline="true" :model="formInline" class="user-search">
+    <el-form :inline="true" :model="formInline" class="adv-search">
       <el-form-item label>
         <el-input size="small" v-model="formInline.advName" placeholder="请输入广告名"></el-input>
       </el-form-item>
@@ -36,7 +36,7 @@
         <template slot-scope="scope">{{scope.row.advCategory|advCategory}}</template>
       </el-table-column>
       <el-table-column align="center" prop="onceShowTime" label="播放时长/大小" min-width="120"></el-table-column>
-      <el-table-column align="center" prop="policePlace" label="发布时间" min-width="120">
+      <el-table-column align="center" prop="policePlace" label="广告链接" min-width="120">
         <template slot-scope="scope">
           <img :src="scope.row.advUrl" class="imgstyle" />
         </template>
@@ -48,7 +48,7 @@
         <template slot-scope="scope">
           <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row,'bj')">编辑</el-button>
           <el-button size="mini" type="warning" @click="handleEdit(scope.$index, scope.row,'sh')">审核</el-button>
-          <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button>
+          <!-- <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>
@@ -92,33 +92,6 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <!-- <el-form-item label="广告时间">
-          <el-col :span="10">
-            <el-form-item prop="startPlayTime">
-              <el-date-picker
-                v-model="editForm.startPlayTime"
-                size="small"
-                type="datetime"
-                placeholder="选择开始时间"
-                style="width:185px;"
-                :picker-options="pickerOptionsStart"
-              ></el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col class="line" :span="1">---</el-col>
-          <el-col :span="10">
-            <el-form-item prop="stopPlayTime">
-              <el-date-picker
-                v-model="editForm.stopPlayTime"
-                size="small"
-                type="datetime"
-                placeholder="选择结束时间"
-                style="width: 185px;"
-                :picker-options="pickerOptionsEnd"
-              ></el-date-picker>
-            </el-form-item>
-          </el-col>
-        </el-form-item>-->
         <el-form-item label="单次播放时间" prop="onceShowTime">
           <el-input size="small" v-model="editForm.onceShowTime" placeholder="请输入单次播放时间"></el-input>
         </el-form-item>
@@ -178,25 +151,6 @@ export default {
   name: "adviertisementManagement",
   data() {
     return {
-      // pickerOptionsStart: {
-      //   disabledDate: time => {
-      //     if (this.editForm.stopPlayTime) {
-      //       return (
-      //         time.getTime() < Date.now() - 8.64e7 ||
-      //         time.getTime() > this.editForm.stopPlayTime
-      //       );
-      //     }
-      //     return time.getTime() < Date.now() - 8.64e7;
-      //   }
-      // },
-      // pickerOptionsEnd: {
-      //   disabledDate: time => {
-      //     return (
-      //       time.getTime() < Date.now() - 8.64e7 ||
-      //       time.getTime() < this.editForm.startPlayTime
-      //     );
-      //   }
-      // },
       file: null,
       imageUrl: null,
       advertisingType: [
@@ -242,8 +196,6 @@ export default {
         advName: null,
         advCategory: null,
         advType: null,
-        // startPlayTime: null,
-        // stopPlayTime: null,
         onceShowTime: null,
         orderNumber: null,
         advAudit: 0
@@ -259,20 +211,6 @@ export default {
         advType: [
           { required: true, message: "请选择内容类别", trigger: "change" }
         ],
-        // startPlayTime: [
-        //   {
-        //     required: true,
-        //     message: "请选择开始时间",
-        //     trigger: "change"
-        //   }
-        // ],
-        // stopPlayTime: [
-        //   {
-        //     required: true,
-        //     message: "请选择结束时间",
-        //     trigger: "change"
-        //   }
-        // ],
         onceShowTime: [
           { required: true, message: "请填写播放时间", trigger: "blur" }
         ],
@@ -408,8 +346,6 @@ export default {
           advName: null,
           advCategory: null,
           advType: null,
-          // startPlayTime: null,
-          // stopPlayTime: null,
           onceShowTime: null,
           orderNumber: null,
           advAudit: 0
@@ -436,12 +372,6 @@ export default {
             flag ? (this.editForm.advAudit = 1) : (this.editForm.advAudit = 2);
             url = "/update";
           }
-          // this.editForm.startPlayTime = new Date(
-          //   this.editForm.startPlayTime
-          // ).getTime();
-          // this.editForm.stopPlayTime = new Date(
-          //   this.editForm.stopPlayTime
-          // ).getTime();
           let data = new FormData();
           for (let key in this.editForm) {
             data.append(key, this.editForm[key]);
@@ -512,11 +442,8 @@ export default {
 
 <style lang="less" scoped>
 .adviertisementManagement {
-  .user-search {
+  .adv-search {
     margin-top: 20px;
-  }
-  .userRole {
-    width: 100%;
   }
   .imgstyle {
     width: 50px;

@@ -25,7 +25,6 @@
       :data="advertisingGroupData"
       highlight-current-row
       row-key="id"
-      :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
       v-loading="loading"
       border
       element-loading-text="拼命加载中"
@@ -281,7 +280,7 @@ export default {
         groupName: null
       },
       //用户数据
-      advertisingGroupData: [{}],
+      advertisingGroupData: [],
       // 分页参数
       pageparm: {
         currentPage: 1,
@@ -321,7 +320,6 @@ export default {
       netWorkAdvGroupDet(url, null, "get")
         .then(res => {
           console.log(res.body.length);
-
           res.body.length ? (this.advData = res.body) : (this.advData = []);
         })
         .catch(err => {

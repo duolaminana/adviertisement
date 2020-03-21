@@ -230,7 +230,7 @@ export default {
         advAudit: null
       },
       //广告数据
-      advertisingData: [{}],
+      advertisingData: [],
       // 分页参数
       pageparm: {
         currentPage: 1,

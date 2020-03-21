@@ -86,3 +86,45 @@ export const netWorkAdvGroupDet = (URL, info, method = "post") => {
       });
   });
 };
+// 广告分组管理
+export const netWorkEquGroup = (URL, info, method = "post") => {
+  return new Promise((resolve, reject) => {
+    axios
+      .request({
+        url: base + "/machineGroup" + URL,
+        data: info,
+        method
+      })
+      .then(res => {
+        if (res.data.status == 200) {
+          resolve(res.data);
+        } else {
+          reject(res.data.body);
+        }
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+};
+// 广告分组管理
+export const netWorkEquGroupDet = (URL, info, method = "post") => {
+  return new Promise((resolve, reject) => {
+    axios
+      .request({
+        url: base + "/machineGroupDetails" + URL,
+        data: info,
+        method
+      })
+      .then(res => {
+        if (res.data.status == 200) {
+          resolve(res.data);
+        } else {
+          reject(res.data.body);
+        }
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+};

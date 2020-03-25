@@ -15,7 +15,8 @@
       </el-form-item>
       <el-form-item>
         <el-button size="small" type="primary" icon="el-icon-search" @click="search">搜索</el-button>
-        <el-button size="small" type="primary" icon="el-icon-plus" @click="handleEdit">添加</el-button>
+        <el-button size="small" type="primary" icon="el-icon-plus" @click="handleEdit('xz')">添加</el-button>
+        <el-button size="small" type="primary" icon="el-icon-refresh" @click="reset">重置</el-button>
       </el-form-item>
     </el-form>
     <!--列表-->
@@ -48,8 +49,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="240">
         <template slot-scope="scope">
-          <el-button size="mini" type="primary" @click="handleEdit(scope.row,'bj')">编辑</el-button>
-          <el-button size="mini" type="success" @click="handleEdit(scope.row,'sh')">审核</el-button>
+          <el-button size="mini" type="primary" @click="handleEdit('bj',scope.row)">编辑</el-button>
+          <el-button size="mini" type="success" @click="handleEdit('sh',scope.row)" v-if="user.level==1">审核</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -253,7 +254,8 @@ export default {
         total: 10
       },
       rowData: null,
-      showNewlyType: "xz"
+      showNewlyType: "xz",
+      user: {}
     };
   },
 
@@ -274,11 +276,11 @@ export default {
   },
   created() {
     this.getData();
+    this.user = JSON.parse(localStorage.getItem("userdata"));
   },
   methods: {
     seeMore(row, type) {
       console.log(row);
-
       this.machineChangeVisible = true;
       if (type == "adv") {
         this.titleMore = "广告分组详情";
@@ -291,6 +293,11 @@ export default {
         this.machineGroupId = row.machineGroupId;
         this.getEquData();
       }
+    },
+    reset() {
+      this.formInline.planName = null;
+      this.formInline.pageIndex = 1;
+      this.getData();
     },
     // 获取数据方法
     getData() {
@@ -324,9 +331,8 @@ export default {
       this.getData();
     },
     //显示编辑界面
-    handleEdit(row, type) {
+    handleEdit(type,row) {
       console.log(row);
-
       this.editFormVisible = true;
       this.getAdvGroup();
       this.getEquGroup();

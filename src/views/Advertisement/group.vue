@@ -33,7 +33,7 @@
       <el-table-column align="center" type="selection" width="55"></el-table-column>
       <el-table-column align="center" prop="groupName" label="分组名称" min-width="120"></el-table-column>
       <el-table-column align="center" prop="createDate" label="发布时间" min-width="120"></el-table-column>
-      <el-table-column align="center" prop label="分组详情" min-width="120">
+      <el-table-column align="center" prop label="分组详情" min-width="240">
         <template slot-scope="scope">
           <el-button size="mini" type="warning" @click="advGroupMore(scope.row,'xz')">新增详情</el-button>
           <el-button size="mini" type="success" @click="advGroupMore(scope.row,'ck')">查看详情</el-button>
@@ -142,7 +142,23 @@
                 :key="item.advId"
                 :label="item.advName"
                 :value="item.advId"
-              ></el-option>
+              >
+                <span style="float: left">{{ item.advName }}</span>
+
+                <el-popover placement="right" width="400" trigger="hover">
+                  <div>
+                    <img :src="item.advUrl" alt style="width:400px;height:200px">
+                  </div>
+                  <img
+                  :src="item.advUrl"
+                  alt
+                  class="selectImg"
+                  style="float: right; width:30px;height:30px"
+                  slot="reference"
+                />
+                </el-popover>
+                
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="广告时间">
@@ -454,7 +470,6 @@ export default {
     reset() {
       this.formInline.advName = null;
       this.formInline.pageIndex = 1;
-      this.formInline.pageSize = 10;
       this.getData();
     },
     // 获取数据方法
@@ -582,6 +597,11 @@ export default {
     .cancel {
       margin-left: 430px;
     }
+    // .selectImg{
+    //   :hover{
+
+    //   }
+    // }
   }
   .advGroupMore {
     .imgstyle {

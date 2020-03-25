@@ -284,7 +284,6 @@ export default {
     reset() {
       this.formInline.advName = null;
       this.formInline.pageIndex = 1;
-      this.formInline.pageSize = 10;
       this.getData();
     },
     changeUpload(file) {

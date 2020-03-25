@@ -130,6 +130,9 @@
                 @keyup.enter.native="searchEqu"
               ></el-input>
             </el-form-item>
+            <el-form-item>
+              <el-button size="small" type="primary" icon="el-icon-search" @click="searchEqu">查询</el-button>
+            </el-form-item>
           </div>
           <div>
             <el-table
@@ -407,7 +410,6 @@ export default {
     reset() {
       this.formInline.equName = null;
       this.formInline.pageIndex = 1;
-      this.formInline.pageSize = 10;
       this.getData();
     },
     // 获取数据方法

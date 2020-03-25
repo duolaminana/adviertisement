@@ -1,26 +1,43 @@
 <template>
   <div class="login-wrap">
-    <el-form label-position="left" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="demo-ruleForm login-container">
+    <el-form
+      label-position="left"
+      :model="ruleForm"
+      :rules="rules"
+      ref="ruleForm"
+      label-width="0px"
+      class="demo-ruleForm login-container"
+    >
       <h3 class="title">用户登录</h3>
-      <el-form-item prop="username">
-        <el-input type="text" v-model="ruleForm.username" auto-complete="off" placeholder="账号"></el-input>
+      <el-form-item prop="userName">
+        <el-input type="text" v-model="ruleForm.userName" auto-complete="off" placeholder="账号"></el-input>
       </el-form-item>
-      <el-form-item prop="password">
-        <el-input type="password" v-model="ruleForm.password" auto-complete="off" placeholder="密码"></el-input>
+      <el-form-item prop="userPassword">
+        <el-input
+          type="password"
+          v-model="ruleForm.userPassword"
+          auto-complete="off"
+          placeholder="密码"
+        ></el-input>
       </el-form-item>
       <el-checkbox class="remember" v-model="rememberpwd">记住密码</el-checkbox>
       <el-form-item style="width:100%;">
-        <el-button type="primary" style="width:100%;" @click="submitForm('ruleForm')" :loading="logining">登录</el-button>
+        <el-button
+          type="primary"
+          style="width:100%;"
+          @click="submitForm('ruleForm')"
+          :loading="logining"
+        >登录</el-button>
       </el-form-item>
     </el-form>
   </div>
 </template>
 <script type="text/ecmascript-6">
-import { login } from '../api/userMG'
-import { setCookie, getCookie, delCookie } from '../utils/util'
-import md5 from 'js-md5'
+import { user } from "../api/http.js";
+import { setCookie, getCookie, delCookie } from "../utils/util";
+import md5 from "js-md5";
 export default {
-  name: 'login',
+  name: "login",
   data() {
     return {
       //定义loading默认为false
@@ -29,61 +46,89 @@ export default {
       rememberpwd: false,
       ruleForm: {
         //username和password默认为空
-        username: '',
-        password: '',
-        code: '',
-        randomStr: '',
-        codeimg: ''
+        userName: "",
+        userPassword: ""
       },
       //rules前端验证
       rules: {
-        username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
-        password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-        code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
+        userName: [{ required: true, message: "请输入账号", trigger: "blur" }],
+        userPassword: [
+          { required: true, message: "请输入密码", trigger: "blur" }
+        ],
+        code: [{ required: true, message: "请输入验证码", trigger: "blur" }]
       }
-    }
+    };
   },
   // 创建完毕状态(里面是操作)
   created() {
     // 获取图形验证码
     // 获取存在本地的用户名密码
-    this.getuserpwd()
+    this.getuserpwd();
+    console.log(getCookie("userName"));
+    console.log(getCookie("userPassword"));
+    
   },
   // 里面的函数只有调用才会执行
   methods: {
     // 获取用户名密码
     getuserpwd() {
-      if (getCookie('user') != '' && getCookie('pwd') != '') {
-        this.ruleForm.username = getCookie('user')
-        this.ruleForm.password = getCookie('pwd')
-        this.rememberpwd = true
+      if (getCookie("userName") != "" && getCookie("userPassword") != "") {
+        this.ruleForm.userName = getCookie("userName");
+        this.ruleForm.userPassword = getCookie("userPassword");
+        this.rememberpwd = true;
       }
     },
     //获取info列表
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          this.logining = true
+          // this.logining = true;
           // 测试通道，不为空直接登录
-          if(this.ruleForm.username=='admin'&&this.ruleForm.password=='123456'){
-            setTimeout(() => {
-              this.logining = false
-              this.$store.commit('login', 'true')
-              this.$router.push({ path: '/index' })
-            }, 1000)
-          }else{
-            this.$message.error('账号或密码错误！')
-            this.logining = false
-          }
-        } else {
-          // 获取图形验证码
-          this.$message.error('请输入用户名密码！')
-          this.logining = false
+          // if(this.ruleForm.userName=='admin'&&this.ruleForm.userPassword=='123456'){
+          //   setTimeout(() => {
+          //     this.logining = false
+          //      setCookie("uesrName", this.ruleForm.userName, 7);
+          //      setCookie("userPassword", this.ruleForm.userPassword, 7);
+          //     this.$store.commit('login', 'true')
+          //     this.$router.push({ path: '/index' })
+          //   }, 1000)
+          // }else{
+          //   this.$message.error('账号或密码错误！')
+          //   this.logining = false
+          // }
+          // 登录
+          user("/login", this.ruleForm)
+            .then(res => {
+              if (this.rememberpwd) {
+                //保存帐号到cookie，有效期7天
+                setCookie("userName", this.ruleForm.userName, 7);
+                //保存密码到cookie，有效期7天
+                setCookie("userPassword", this.ruleForm.userPassword, 7);
+              } else {
+                delCookie("user");
+                delCookie("pwd");
+              }
+              //如果请求成功就让他2秒跳转路由
+              setTimeout(() => {
+                this.logining = false;
+                // 缓存token
+                // localStorage.setItem("logintoken", res.data.token);
+                // 缓存用户个人信息
+                localStorage.setItem("userdata", JSON.stringify(res.body));
+                this.$store.commit("login", "true");
+                this.$router.push({ path: "/index" });
+              }, 1000);
+            })
+            .catch(err => {
+              this.$message.error("用户名或密码错误，请稍后再试！");
+              this.logining = false;
+              return false;
+            })
         }
-      })
-    },
+      });
+    }
   }
-}
+};
 </script>
 
 <style scoped>

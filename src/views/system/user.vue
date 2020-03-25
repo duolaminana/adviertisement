@@ -34,6 +34,7 @@
       <el-form-item>
         <el-button size="small" type="primary" icon="el-icon-search" @click="search">搜索</el-button>
         <el-button size="small" type="primary" icon="el-icon-plus" @click="handleEdit()">添加</el-button>
+        <el-button size="small" type="primary" icon="el-icon-refresh" @click="reset">重置</el-button>
       </el-form-item>
     </el-form>
     <!--列表-->
@@ -47,8 +48,8 @@
       style="width: 100%;"
     >
       <el-table-column align="center" prop="machineCode" label="终端编号" width="120"></el-table-column>
-      <el-table-column align="center" prop="area" label="分区" width="120"></el-table-column>
-      <el-table-column align="center" prop="point" label="酒店名" width="120"></el-table-column>
+      <el-table-column align="center" prop="area" label="分区" width="60"></el-table-column>
+      <el-table-column align="center" prop="point" label="酒店名" width="120" show-overflow-tooltip></el-table-column>
       <el-table-column align="center" prop="police" label="所属分局" min-width="50"></el-table-column>
       <el-table-column align="center" prop="policePlace" label="所属派出所" min-width="50"></el-table-column>
       <el-table-column align="center" prop="isPoi" label="是否有POI" min-width="50">
@@ -59,14 +60,16 @@
       <el-table-column align="center" prop="poi" label="poi名称" min-width="120"></el-table-column>
       <el-table-column align="center" prop="roomNum" label="房间数" min-width="50"></el-table-column>
       <el-table-column align="center" prop="type" label="酒店类型" min-width="80"></el-table-column>
-      <el-table-column align="center" prop="address" label="酒店地址" width="200"></el-table-column>
+      <el-table-column align="center" prop="address" label="酒店地址" width="200" show-overflow-tooltip></el-table-column>
       <el-table-column align="center" prop="isBusiness" label="营业状态" min-width="50">
         <template slot-scope="scope">
-          <div>{{scope.row.isBusiness?'营业':'歇业'}}</div>
+          <span v-if="scope.row.isBusiness" class="green">营业</span>
+          <span v-if="!scope.row.isBusiness" class="red">歇业</span>
+          <!-- <div>{{scope.row.isBusiness?'营业':'歇业'}}</div> -->
         </template>
       </el-table-column>
       <el-table-column align="center" prop="updateTime" label="最后更新时间" min-width="120"></el-table-column>
-      <el-table-column label="操作" align="center" min-width="300">
+      <el-table-column label="操作" align="center" min-width="360">
         <template slot-scope="scope">
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button>
@@ -298,6 +301,14 @@ export default {
       this.machineChangeVisible = true;
       this.rowData = row;
     },
+    reset() {
+      this.formInline.machineCode = null;
+      this.formInline.point = null;
+      this.formInline.isBusiness = null;
+      this.formInline.area = null;
+      this.formInline.machineState = null;
+      this.formInline.pageIndex = 1;
+    },
     // 获取数据方法
     getData() {
       const loading = this.$loading({
@@ -327,10 +338,12 @@ export default {
     },
     //搜索事件
     search() {
+      this.formInline.pageIndex = 1;
       this.getData();
     },
     //显示编辑界面
-    handleEdit: function(index, row) {
+    handleEdit(index, row) {
+      console.log(row);
       this.editFormVisible = true;
       if (row) {
         this.showNewlyType = "bj";
@@ -469,7 +482,7 @@ export default {
   .el-select {
     width: 100px;
   }
-  .el-input{
+  .el-input {
     width: 160px;
   }
   .user-search {

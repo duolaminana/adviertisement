@@ -149,3 +149,24 @@ export const netWorkadvPlan = (URL, info, method = "post") => {
       });
   });
 };
+// 登录;
+export const user = (URL, info, method = "post") => {
+  return new Promise((resolve, reject) => {
+    axios
+      .request({
+        url: base + "/user" + URL,
+        data: info,
+        method
+      })
+      .then(res => {
+        if (res.data.status == 200) {
+          resolve(res.data);
+        } else {
+          reject(res.data.body);
+        }
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+};

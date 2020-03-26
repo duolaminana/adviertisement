@@ -75,8 +75,8 @@
             placeholder="旧密码"
           ></el-input>
           <div class="eye">
-            <img @click="oldPswd=!oldPswd" v-if="!oldPswd" src="../assets/img/eye-off.png" alt />
-            <img @click="oldPswd=!oldPswd" v-if="oldPswd" src="../assets/img/eye_on.png" alt />
+            <img @click="oldPswd=!oldPswd" v-if="!oldPswd" src="../assets/img/eye-off.png" alt style="cursor: pointer;" />
+            <img @click="oldPswd=!oldPswd" v-if="oldPswd" src="../assets/img/eye_on.png" alt style="cursor: pointer;" />
           </div>
         </el-form-item>
         <el-form-item label="新密码" prop="userPassword" class="psd">
@@ -87,8 +87,8 @@
             placeholder="新密码"
           ></el-input>
           <div class="eye">
-            <img @click="newPswd=!newPswd" v-if="!newPswd" src="../assets/img/eye-off.png" alt />
-            <img @click="newPswd=!newPswd" v-if="newPswd" src="../assets/img/eye_on.png" alt />
+            <img @click="newPswd=!newPswd" v-if="!newPswd" src="../assets/img/eye-off.png" alt style="cursor: pointer;" />
+            <img @click="newPswd=!newPswd" v-if="newPswd" src="../assets/img/eye_on.png" alt style="cursor: pointer;" />
           </div>
         </el-form-item>
       </el-form>
@@ -100,7 +100,6 @@
   </div>
 </template>
 <script>
-import { loginout } from "../api/userMG";
 import { user } from "../api/http.js";
 export default {
   name: "navcon",

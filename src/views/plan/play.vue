@@ -50,7 +50,12 @@
       <el-table-column label="操作" align="center" width="240">
         <template slot-scope="scope">
           <el-button size="mini" type="primary" @click="handleEdit('bj',scope.row)">编辑</el-button>
-          <el-button size="mini" type="success" @click="handleEdit('sh',scope.row)" v-if="user.level==1">审核</el-button>
+          <el-button
+            size="mini"
+            type="success"
+            @click="handleEdit('sh',scope.row)"
+            v-if="user.level==1"
+          >审核</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -331,7 +336,7 @@ export default {
       this.getData();
     },
     //显示编辑界面
-    handleEdit(type,row) {
+    handleEdit(type, row) {
       console.log(row);
       this.editFormVisible = true;
       this.getAdvGroup();
@@ -378,6 +383,7 @@ export default {
           let url;
           if (this.showNewlyType == "xz") {
             url = "/add";
+            this.editForm.state = 0;
           } else if (this.showNewlyType == "bj") {
             url = "/update";
           } else {

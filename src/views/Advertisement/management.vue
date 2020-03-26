@@ -13,6 +13,34 @@
       <el-form-item label>
         <el-input size="small" v-model="formInline.advName" placeholder="请输入广告名"></el-input>
       </el-form-item>
+      <el-form-item label>
+        <el-select
+          size="small"
+          clearable
+          v-model="formInline.advCategory"
+          placeholder="广告类型"
+          style="width:140px"
+        >
+          <el-option label="公益广告" value="1"></el-option>
+          <el-option label="宣传广告" value="2"></el-option>
+          <el-option label="效益广告" value="3"></el-option>
+          <el-option label="招商广告" value="4"></el-option>
+          <el-option label="酒店广告" value="5"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label>
+        <el-select
+          size="small"
+          clearable
+          v-model="formInline.advType"
+          placeholder="内容类别"
+          style="width:140px"
+        >
+          <el-option label="文本" value="1"></el-option>
+          <el-option label="图片" value="2"></el-option>
+          <el-option label="视频" value="3"></el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button size="small" type="primary" icon="el-icon-search" @click="search">搜索</el-button>
         <el-button size="small" type="primary" icon="el-icon-plus" @click="handleEdit">添加</el-button>
@@ -47,7 +75,12 @@
       <el-table-column label="操作" align="center" min-width="240">
         <template slot-scope="scope">
           <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row,'bj')">编辑</el-button>
-          <el-button size="mini" type="warning" @click="handleEdit(scope.$index, scope.row,'sh')">审核</el-button>
+          <el-button
+            size="mini"
+            type="warning"
+            @click="handleEdit(scope.$index, scope.row,'sh')"
+            v-if="user.level==1"
+          >审核</el-button>
           <!-- <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button> -->
         </template>
       </el-table-column>
@@ -70,7 +103,7 @@
         :disabled="isCheck"
       >
         <el-form-item label="广告名称" prop="advName">
-          <el-input size="small" v-model="editForm.advName" placeholder="请输入广告名称" ></el-input>
+          <el-input size="small" v-model="editForm.advName" placeholder="请输入广告名称"></el-input>
         </el-form-item>
         <el-form-item label="广告类型" prop="advCategory">
           <el-select size="small" v-model="editForm.advCategory" clearable placeholder="请选择">
@@ -103,7 +136,7 @@
             ref="myUpload"
             class="avatar-uploader"
             action
-            :show-file-list="imageUrl?true:false"
+            :show-file-list="false"
             :auto-upload="false"
             :on-change="changeUpload"
           >
@@ -169,6 +202,10 @@ export default {
         {
           value: "4",
           label: "招商广告"
+        },
+        {
+          value: "5",
+          label: "酒店广告"
         }
       ],
       textType: [
@@ -239,7 +276,8 @@ export default {
       },
       rowData: null,
       showNewlyType: "xz",
-      isCheck: true
+      isCheck: true,
+      user: {}
     };
   },
   // 注册组件
@@ -248,6 +286,8 @@ export default {
   },
   created() {
     this.getData();
+    this.user = JSON.parse(localStorage.getItem("userdata"));
+    console.log(this.user);
   },
   filters: {
     advType(num) {
@@ -277,12 +317,17 @@ export default {
         case "4":
           return "招商广告";
           break;
+        case "5":
+          return "酒店广告";
+          break;
       }
     }
   },
   methods: {
     reset() {
       this.formInline.advName = null;
+      this.formInline.advCategory = null;
+      this.formInline.advType = null;
       this.formInline.pageIndex = 1;
       this.getData();
     },
@@ -331,12 +376,20 @@ export default {
         this.showNewlyType = "bj";
         this.title = "编辑广告";
         this.editForm = JSON.parse(JSON.stringify(row));
+        this.imageUrl = row.advUrl;
+        this.$nextTick(() => {
+          this.$refs["editForm"].clearValidate();
+        });
         console.log(this.editForm);
       } else if (type == "sh") {
         this.isCheck = true;
         this.showNewlyType = "sh";
         this.title = "审核广告";
         this.editForm = JSON.parse(JSON.stringify(row));
+        this.imageUrl = row.advUrl;
+        this.$nextTick(() => {
+          this.$refs["editForm"].clearValidate();
+        });
       } else {
         this.isCheck = false;
         this.title = "新增广告";
@@ -351,9 +404,9 @@ export default {
         };
         this.file = null;
         this.imageUrl = null;
-        setTimeout(() => {
-          this.$refs["myUpload"].clearFiles();
-        }, 2);
+        this.$nextTick(() => {
+          this.$refs["editForm"].resetFields();
+        });
       }
     },
 
@@ -365,8 +418,10 @@ export default {
           let url;
           if (this.showNewlyType == "xz") {
             url = "/upload";
+            this.editForm.advAudit = 0;
           } else if (this.showNewlyType == "bj") {
             url = "/update";
+            this.editForm.advAudit = 0;
           } else {
             flag ? (this.editForm.advAudit = 1) : (this.editForm.advAudit = 2);
             url = "/update";
@@ -473,14 +528,14 @@ export default {
     .avatar-uploader-icon {
       font-size: 28px;
       color: #8c939d;
-      width: 170px;
-      height: 170px;
-      line-height: 170px;
+      width: 390px;
+      height: 190px;
+      line-height: 190px;
       text-align: center;
     }
     .avatar {
-      width: 170px;
-      height: 170px;
+      width: 390px;
+      height: 190px;
       display: block;
     }
   }

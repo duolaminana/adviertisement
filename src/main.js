@@ -2,7 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 // 引入element UI
-import ElementUI from 'element-ui';
+// import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import App from './App';
 // 引入路由
@@ -25,7 +25,7 @@ Vue.prototype.$axios = axios;
 Vue.config.productionTip = false;
 
 // 使用element UI
-Vue.use(ElementUI);
+// Vue.use(ElementUI);
 // 过滤器
 import * as custom from './utils/util'
 Vue.filter("dateformat", (dataStr, pattern) => {

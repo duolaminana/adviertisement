@@ -254,9 +254,11 @@ export default {
       if (this.machineChangeValue.machineCode) {
         const url = `/replaceMachine?machineCode=${this.machineChangeValue.machineCode}
         &&id=${this.rowData.id}`;
+        this.loading = true;
         netWorkHttp(url, null, "get")
           .then(res => {
             this.machineChangeVisible = false;
+            this.loading = false;
             this.$message({
               message: "操作成功",
               type: "success"
@@ -264,6 +266,7 @@ export default {
             this.getData();
           })
           .catch(err => {
+            this.loading = false;
             this.$message.error("err");
           });
       } else {
@@ -285,8 +288,10 @@ export default {
         });
     },
     machineChange(row) {
+      console.log(row);
       this.machineChangeVisible = true;
       this.rowData = row;
+      this.machineChangeValue = {};
     },
     reset() {
       this.formInline.machineCode = null;
@@ -395,6 +400,7 @@ export default {
           address,
           poi
         };
+        this.loading = true;
         let url;
         if (this.showNewlyType == "xz") {
           url = "/add";
@@ -449,7 +455,6 @@ export default {
               }
             })
             .catch(err => {
-              this.loading = false;
               this.$message.error("数据删除失败，请稍后再试！");
             });
         })

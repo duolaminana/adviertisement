@@ -20,7 +20,7 @@ module.exports = {
       }
     },
 
-    // Various Dev Server settings
+    // Various Dev Server settings各种开发服务器设置
     host: "localhost", // can be overwritten by process.env.HOST
     port: 9999, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: true,

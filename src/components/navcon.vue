@@ -73,11 +73,10 @@
             size="small"
             v-model.trim="formPassword.oldPassword"
             placeholder="旧密码"
-          ></el-input>
-          <div class="eye">
-            <img @click="oldPswd=!oldPswd" v-if="!oldPswd" src="../assets/img/eye-off.png" alt style="cursor: pointer;" />
-            <img @click="oldPswd=!oldPswd" v-if="oldPswd" src="../assets/img/eye_on.png" alt style="cursor: pointer;" />
-          </div>
+          >
+            <i v-if="oldPswd" slot="suffix" class="iconfont icon-eye" @click="oldPswd=!oldPswd"></i>
+            <i v-if="!oldPswd" slot="suffix" class="iconfont icon-eye1" @click="oldPswd=!oldPswd"></i>
+          </el-input>
         </el-form-item>
         <el-form-item label="新密码" prop="userPassword" class="psd">
           <el-input
@@ -85,11 +84,10 @@
             size="small"
             v-model.trim="formPassword.userPassword"
             placeholder="新密码"
-          ></el-input>
-          <div class="eye">
-            <img @click="newPswd=!newPswd" v-if="!newPswd" src="../assets/img/eye-off.png" alt style="cursor: pointer;" />
-            <img @click="newPswd=!newPswd" v-if="newPswd" src="../assets/img/eye_on.png" alt style="cursor: pointer;" />
-          </div>
+          >
+            <i v-if="newPswd" slot="suffix" class="iconfont icon-eye" @click="newPswd=!newPswd"></i>
+            <i v-if="!newPswd" slot="suffix" class="iconfont icon-eye1" @click="newPswd=!newPswd"></i>
+          </el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -304,11 +302,8 @@ export default {
     border: none;
   }
   .psd {
-    position: relative;
-    .eye {
-      position: absolute;
-      right: 6px;
-      top: 6px;
+    .iconfont {
+      cursor: pointer;
     }
   }
 }

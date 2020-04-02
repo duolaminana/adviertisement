@@ -11,6 +11,7 @@ import router from './router';
 import store from './vuex/store';
 // 引入icon
 import './assets/icon/iconfont.css'
+import "./assets/font/iconfont.css";
 // 引入时间插件
 import moment from "moment";
 Vue.prototype.$moment = moment;

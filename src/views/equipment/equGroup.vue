@@ -408,7 +408,7 @@ export default {
         });
     },
     reset() {
-      this.formInline.equName = null;
+      this.formInline.groupName = null;
       this.formInline.pageIndex = 1;
       this.getData();
     },

@@ -36,9 +36,21 @@
           placeholder="内容类别"
           style="width:140px"
         >
-          <el-option label="文本" value="1"></el-option>
-          <el-option label="图片" value="2"></el-option>
-          <el-option label="视频" value="3"></el-option>
+          <el-option label="视频" value="2"></el-option>
+          <el-option label="图片" value="3"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label>
+        <el-select
+          size="small"
+          clearable
+          v-model="formInline.advAudit"
+          placeholder="审核状态"
+          style="width:140px"
+        >
+          <el-option label="待审核" value="0"></el-option>
+          <el-option label="审核通过" value="1"></el-option>
+          <el-option label="审核失败" value="2"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -63,24 +75,38 @@
       <el-table-column align="center" prop="advCategory" label="广告类型" width="120">
         <template slot-scope="scope">{{scope.row.advCategory|advCategory}}</template>
       </el-table-column>
-      <el-table-column align="center" prop="onceShowTime" label="播放时长/大小" min-width="120"></el-table-column>
+      <el-table-column align="center" prop="onceShowTime" label="播放时长/大小" width="120"></el-table-column>
       <el-table-column align="center" prop="policePlace" label="广告链接" min-width="120">
         <template slot-scope="scope">
-          <img :src="scope.row.advUrl" class="imgstyle" />
+          <a v-if="scope.row.advType==3" :href="scope.row.advUrl" target="_blank" title="点击查看">
+            <img :src="scope.row.advUrl" class="imgstyle" />
+          </a>
+          <a v-if="scope.row.advType==2" :href="scope.row.advUrl" target="_blank" title="点击查看" >
+            <video class="imgstyle" :src="scope.row.advUrl" >
+            </video>
+          </a>
         </template>
       </el-table-column>
       <el-table-column align="center" prop="advType" label="内容类别" width="120">
         <template slot-scope="scope">{{scope.row.advType|advType}}</template>
+      </el-table-column>
+      <el-table-column align="center" prop="advAudit" label="审核状态" width="120">
+        <template slot-scope="scope">
+          <span v-if="scope.row.advAudit==0" style="color:#ffbd72">待审核</span>
+          <span v-if="scope.row.advAudit==1" style="color:#19be6b">审核通过</span>
+          <span v-if="scope.row.advAudit==2" style="color:#ed4014">审核失败</span>
+        </template>
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="240">
         <template slot-scope="scope">
           <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row,'bj')">编辑</el-button>
           <el-button
             size="mini"
-            type="warning"
+            type="success"
             @click="handleEdit(scope.$index, scope.row,'sh')"
-            v-if="user.level==1"
-          >审核</el-button>
+            v-if="user.level==1&&scope.row.advAudit==0"
+          >&nbsp&nbsp审核&nbsp&nbsp</el-button>
+          <el-button size="mini" disabled v-if="scope.row.advAudit!=0">已审核</el-button>
           <!-- <el-button size="mini" type="danger" @click="deleteUser(scope.$index, scope.row)">删除</el-button> -->
         </template>
       </el-table-column>
@@ -161,7 +187,7 @@
           type="primary"
           :loading="loading"
           class="title"
-          @click="submitForm('editForm',true)"
+          @click="examineForm(true)"
         >审核通过</el-button>
         <el-button
           v-if="this.showNewlyType=='sh'"
@@ -169,7 +195,7 @@
           type="danger"
           :loading="loading"
           class="title"
-          @click="submitForm('editForm',false)"
+          @click="examineForm(false)"
         >审核不通过</el-button>
       </div>
     </el-dialog>
@@ -210,10 +236,6 @@ export default {
       ],
       textType: [
         {
-          value: "1",
-          label: "文字广告"
-        },
-        {
           value: "2",
           label: "视频广告"
         },
@@ -235,6 +257,11 @@ export default {
         advType: null,
         onceShowTime: null,
         orderNumber: null,
+        advAudit: 0
+      },
+      // 审核数据
+      examine: {
+        advId: null,
         advAudit: 0
       },
       rules: {
@@ -292,14 +319,11 @@ export default {
   filters: {
     advType(num) {
       switch (num) {
-        case 1:
-          return "文本";
-          break;
         case 2:
-          return "图片";
+          return "视频";
           break;
         case 3:
-          return "视频";
+          return "图片";
           break;
       }
     },
@@ -328,6 +352,7 @@ export default {
       this.formInline.advName = null;
       this.formInline.advCategory = null;
       this.formInline.advType = null;
+      this.formInline.advAudit = null;
       this.formInline.pageIndex = 1;
       this.getData();
     },
@@ -370,6 +395,7 @@ export default {
     },
     //显示编辑界面
     handleEdit(index, row, type) {
+      console.log(row);
       this.editFormVisible = true;
       if (type == "bj") {
         this.isCheck = false;
@@ -380,13 +406,13 @@ export default {
         this.$nextTick(() => {
           this.$refs["editForm"].clearValidate();
         });
-        console.log(this.editForm);
       } else if (type == "sh") {
         this.isCheck = true;
         this.showNewlyType = "sh";
         this.title = "审核广告";
         this.editForm = JSON.parse(JSON.stringify(row));
         this.imageUrl = row.advUrl;
+        this.examine.advId = row.advId;
         this.$nextTick(() => {
           this.$refs["editForm"].clearValidate();
         });
@@ -422,9 +448,6 @@ export default {
           } else if (this.showNewlyType == "bj") {
             url = "/update";
             this.editForm.advAudit = 0;
-          } else {
-            flag ? (this.editForm.advAudit = 1) : (this.editForm.advAudit = 2);
-            url = "/update";
           }
           let data = new FormData();
           for (let key in this.editForm) {
@@ -448,6 +471,25 @@ export default {
             });
         }
       });
+    },
+    examineForm(flag) {
+      this.loading = true;
+      flag ? (this.examine.advAudit = 1) : (this.examine.advAudit = 2);
+      netWorkAdv("/aduit", this.examine)
+        .then(res => {
+          this.editFormVisible = false;
+          this.loading = false;
+          this.$message({
+            message: "操作成功",
+            type: "success"
+          });
+          this.getData();
+        })
+        .catch(err => {
+          this.editFormVisible = false;
+          this.loading = false;
+          this.$message.error("操作失败，请稍后再试！");
+        });
     },
     // 关闭编辑、增加弹出框
     closeDialog(name) {

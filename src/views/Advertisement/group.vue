@@ -382,6 +382,7 @@ export default {
         });
       }
       let data = {
+        advAudit:1,
         pageIndex: 1,
         pageSize: 100000000
       };
@@ -468,7 +469,7 @@ export default {
         });
     },
     reset() {
-      this.formInline.advName = null;
+      this.formInline.groupName = null;
       this.formInline.pageIndex = 1;
       this.getData();
     },

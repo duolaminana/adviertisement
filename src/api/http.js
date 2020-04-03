@@ -1,5 +1,6 @@
 import axios from "axios";
-const base = "http://192.168.3.181:8034";
+const base = "http://120.78.206.233:8081";
+// const base = "http://192.168.3.181:8034";
 // 广告上传地址
 // export const Upload ="http://192.168.10.104:8034/advert/upload"
 // 酒店管理
